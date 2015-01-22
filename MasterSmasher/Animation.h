@@ -11,10 +11,10 @@ public:
 	Animation();
 	~Animation();
 
-	void Init(Bengine::GLTexture texture, glm::vec4* destRect, int frameCount,
-						int frameTicks, bool loop = true,
-						Bengine::ColorRGBA8 color = Bengine::WHITE_COLOR);
-	void Draw(Bengine::SpriteBatch spriteBatch, float rotation = 0);
+	void initialize(Bengine::GLTexture texture, glm::vec4* destRect, int frameCount,
+									int frameTicks, bool loop = true,
+									Bengine::ColorRGBA8 color = Bengine::WHITE_COLOR);
+	void draw(Bengine::SpriteBatch spriteBatch, float rotation = 0);
 
 private:
 	bool m_loop;
