@@ -53,14 +53,20 @@ void SmasherGame::drawMenu() {
   glm::vec4 destRect(0.0f, 0.0f, m_screenWidth, m_screenHeight);
   //Write text
   char buffer[256];
-  sprintf(buffer, "NUM");
+  sprintf(buffer, "MASTER");
   m_spriteBatch.begin(Bengine::GlyphSortType::NONE);
   m_hudSpriteBatch.begin();
-  /*m_spriteFont->draw(m_hudSpriteBatch, buffer,
-                     glm::vec2(250,250), glm::vec2(1.0f), 0.0f,
-                     Bengine::ColorRGBA8(255,255,255,255));*/
+  m_spriteFont->draw(m_hudSpriteBatch, buffer,
+                     glm::vec2(m_screenWidth / 2.0f, 6.0f*m_screenHeight / 8.0f),
+                     glm::vec2(0.8f), 0.0f, Bengine::WHITE_COLOR,
+                     Bengine::Justification::MIDDLE);
+  sprintf(buffer, "SMASHER");
+  m_spriteFont->draw(m_hudSpriteBatch, buffer,
+                     glm::vec2(m_screenWidth / 2.0f, 6.0f*m_screenHeight / 8.0f),
+                     glm::vec2(0.8f), 0.0f, Bengine::ColorRGBA8(255,215,0,255),
+                     Bengine::Justification::MIDDLE);
   m_spriteBatch.draw(destRect,uvRect,
-                      Bengine::ResourceManager::getTexture("Backgrounds/bgMenu.png").id,
+                      Bengine::ResourceManager::getTexture("Menu/Background.png").id,
                      0.0f,Bengine::WHITE_COLOR);
   //Menu objects
   for (size_t i = 0; i < m_menuObjects.size(); i++) {
@@ -76,8 +82,9 @@ void SmasherGame::initMainMenu() {
   m_menuObjects.reserve(NUM_MENU_OBJECTS); //Avoid copying around when allocating @ push
   m_menuObjects.emplace_back();
   m_menuObjects[0].initialize(
-    Bengine::ResourceManager::getTexture("Menu/LevelSelect.png"),
-    ShapeType::RECTANGLE, glm::vec2(500,500), 1, 1, 1, Bengine::ColorRGBA8(250,125,125,255));
+    Bengine::ResourceManager::getTexture("Menu/Title.png"),
+    ShapeType::RECTANGLE, glm::vec2(m_screenWidth / 2.0f, 6.0f*m_screenHeight / 8.0f),
+    1, 1);
 }
 
 void SmasherGame::initShaders() {

@@ -186,3 +186,10 @@ FakesAssemblies/
 *.o
 *.a
 Makefile
+ZombieGame/*
+TutorialGame/*
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+SmasherGame
