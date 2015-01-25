@@ -59,5 +59,10 @@ bool Circle::intersects(const glm::vec2& p1, const glm::vec2& p2) const {
 }
 
 void Circle::setDimensions(glm::vec2 dims) {
-	m_radius = std::max(dims.x,dims.y) / 2.0f;
+	m_radius = std::min(dims.x,dims.y) / 2.0f;
+}
+
+glm::vec4 Circle::getDestRect() const {
+	return glm::vec4(m_center.x - m_radius, m_center.y - m_radius,
+									 m_radius * 2.0f, m_radius * 2.0f);
 }

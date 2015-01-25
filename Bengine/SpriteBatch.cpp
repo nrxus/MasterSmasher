@@ -1,5 +1,6 @@
 #include "SpriteBatch.h"
 #include <algorithm>
+#include <iostream>
 
 namespace Bengine {
 	Glyph::Glyph(const glm::vec4& destRect,const glm::vec4& uvRect, GLuint Texture,

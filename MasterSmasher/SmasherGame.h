@@ -8,6 +8,10 @@
 #include <Bengine/SpriteFont.h>
 #include <Bengine/Window.h>
 
+#include <vector>
+
+class BaseObject;
+
 enum class GameState { MAIN_MENU, TUTORIAL, LEVEL_SELECT, PLAY, SCORE_SCREEN, EXIT };
 
 class SmasherGame
@@ -21,15 +25,20 @@ public:
 private:
   void drawGame();
   void drawMenu();
+  void initMainMenu();
   void initShaders();
   void initSystems();
   void gameLoop();
   void processInput();
   void updateMenu(float deltaTime);
 
+  const size_t NUM_MENU_OBJECTS = 5;
+
   int m_screenWidth = 1024;
   int m_screenHeight = 768;
   float m_fps = 0.0f;
+
+  std::vector<BaseObject> m_menuObjects;
 
   Bengine::AudioEngine m_audioEngine;
   Bengine::Camera2D m_camera;

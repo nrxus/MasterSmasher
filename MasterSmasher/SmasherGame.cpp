@@ -8,6 +8,8 @@
 #include "Rectangle.h"
 #include "Circle.h"
 
+#include "BaseObject.h"
+
 #include <string>
 #include <iostream>
 
@@ -19,6 +21,7 @@ void SmasherGame::run() {
   initSystems();
   Bengine::Music music = m_audioEngine.loadMusic("Music/gameplaySong.ogg");
   music.play(-1);
+  initMainMenu();
   gameLoop();
 }
 
@@ -51,18 +54,30 @@ void SmasherGame::drawMenu() {
   //Write text
   char buffer[256];
   sprintf(buffer, "NUM");
-  m_spriteBatch.begin();
+  m_spriteBatch.begin(Bengine::GlyphSortType::NONE);
   m_hudSpriteBatch.begin();
-  m_spriteFont->draw(m_hudSpriteBatch, buffer,
+  /*m_spriteFont->draw(m_hudSpriteBatch, buffer,
                      glm::vec2(250,250), glm::vec2(1.0f), 0.0f,
-                     Bengine::ColorRGBA8(255,255,255,255));
+                     Bengine::ColorRGBA8(255,255,255,255));*/
   m_spriteBatch.draw(destRect,uvRect,
                       Bengine::ResourceManager::getTexture("Backgrounds/bgMenu.png").id,
                      0.0f,Bengine::WHITE_COLOR);
+  //Menu objects
+  for (size_t i = 0; i < m_menuObjects.size(); i++) {
+    m_menuObjects[i].draw(m_spriteBatch);
+  }
   m_spriteBatch.end();
   m_hudSpriteBatch.end();
   m_spriteBatch.renderBatch();
   m_hudSpriteBatch.renderBatch();
+}
+
+void SmasherGame::initMainMenu() {
+  m_menuObjects.reserve(NUM_MENU_OBJECTS); //Avoid copying around when allocating @ push
+  m_menuObjects.emplace_back();
+  m_menuObjects[0].initialize(
+    Bengine::ResourceManager::getTexture("Menu/LevelSelect.png"),
+    ShapeType::RECTANGLE, glm::vec2(500,500), 1, 1, 1, Bengine::ColorRGBA8(250,125,125,255));
 }
 
 void SmasherGame::initShaders() {

@@ -34,3 +34,8 @@ void Rectangle::setDimensions(glm::vec2 dims) {
 	m_halfDims.x = dims.x / 2.0f;
 	m_halfDims.y = dims.y / 2.0f;
 }
+
+glm::vec4 Rectangle::getDestRect() const {
+	return glm::vec4(m_center.x - m_halfDims.x, m_center.y - m_halfDims.y,
+									 m_halfDims.x * 2.0f, m_halfDims.y * 2.0f);
+}

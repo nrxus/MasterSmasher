@@ -13,6 +13,8 @@ public:
 	bool intersects(const Circle& c) const;
 	void setDimensions(glm::vec2 dims);
 
+	glm::vec4 getDestRect() const;
+
 	glm::vec2 getHalfDims() const { return m_halfDims; }
 
 protected:
