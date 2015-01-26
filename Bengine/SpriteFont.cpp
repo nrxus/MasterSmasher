@@ -2,6 +2,8 @@
 
 #include "SpriteBatch.h"
 
+#include <iostream>
+
 #include <SDL2/SDL.h>
 
 int closestPow2(int i) {
@@ -32,17 +34,22 @@ namespace Bengine {
         m_fontHeight = TTF_FontHeight(f);
         m_regStart = cs;
         m_regLength = ce - cs + 1;
+
         int padding = size / 8;
+				m_padding = size / 8.0f;
 
         // First neasure all the regions
         glm::ivec4* glyphRects = new glm::ivec4[m_regLength];
         int i = 0, advance;
         for (char c = cs; c <= ce; c++) {
             TTF_GlyphMetrics(f, c, &glyphRects[i].x, &glyphRects[i].z, &glyphRects[i].y, &glyphRects[i].w, &advance);
+						if (glyphRects[i].y < m_maxDescent) m_maxDescent = glyphRects[i].y;
             glyphRects[i].z -= glyphRects[i].x;
             glyphRects[i].x = 0;
             glyphRects[i].w -= glyphRects[i].y;
             glyphRects[i].y = 0;
+						if (glyphRects[i].w > m_trueFontHeight)
+							m_trueFontHeight = glyphRects[i].w;
             i++;
         }
 
@@ -203,12 +210,12 @@ namespace Bengine {
     }
 
     glm::vec2 SpriteFont::measure(const char* s) {
-        glm::vec2 size(0, m_fontHeight);
+        glm::vec2 size(0, m_trueFontHeight);
         float cw = 0;
         for (int si = 0; s[si] != 0; si++) {
             char c = s[si];
             if (s[si] == '\n') {
-                size.y += m_fontHeight;
+                size.y += m_trueFontHeight + m_padding;
                 if (size.x < cw)
                     size.x = cw;
                 cw = 0;
@@ -221,18 +228,21 @@ namespace Bengine {
             }
         }
         if (size.x < cw)
-            size.x = cw;
+					size.x = cw - m_padding;
         return size;
     }
 
     void SpriteFont::draw(SpriteBatch& batch, const char* s, glm::vec2 position, glm::vec2 scaling, 
                           float depth, ColorRGBA8 tint, Justification just /* = Justification::LEFT */) {
         glm::vec2 tp = position;
+				tp.y -= m_fontHeight - m_trueFontHeight + m_maxDescent;
         // Apply justification
         if (just == Justification::MIDDLE) {
-            tp.x -= measure(s).x * scaling.x / 2;
+					tp.x -= (measure(s).x) * scaling.x / 2;
+					position.x = tp.x;
         } else if (just == Justification::RIGHT) {
-            tp.x -= measure(s).x * scaling.x;
+					tp.x -= (measure(s).x) * scaling.x;
+					position.x = tp.x;
         }
         for (int si = 0; s[si] != 0; si++) {
             char c = s[si];

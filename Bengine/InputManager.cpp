@@ -20,6 +20,13 @@ namespace Bengine{
     return false;
   }
 
+  bool InputManager::isKeyReleased(unsigned int keyID) {
+    if (!isKeyDown(keyID) && wasKeyDown(keyID)) {
+      return true;
+    }
+    return false;
+  }
+
   void InputManager::pressKey(unsigned int keyID) {
     m_keyMap[keyID] = true;
   }

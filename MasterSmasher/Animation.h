@@ -14,8 +14,8 @@ public:
 	Animation();
 	~Animation();
 
-	void initialize(GLuint texture, size_t totalFrames, Uint32 frameTicks,
-									glm::vec4 destRect, bool loop = true,
+	void initialize(GLuint texture, glm::vec4 destRect, size_t totalFrames = 1,
+									Uint32 frameTicks = 0, bool loop = true,
 									Bengine::ColorRGBA8 color = Bengine::WHITE_COLOR);
 	void draw(Bengine::SpriteBatch& spriteBatch, float rotation = 0);
 	void update();

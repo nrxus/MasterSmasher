@@ -10,7 +10,7 @@
 
 #include <vector>
 
-class BaseObject;
+class BaseButton;
 
 enum class GameState { MAIN_MENU, TUTORIAL, LEVEL_SELECT, PLAY, SCORE_SCREEN, EXIT };
 
@@ -23,6 +23,7 @@ public:
   void run();
 
 private:
+  bool levelSelect(BaseButton& button);
   void drawGame();
   void drawMenu();
   void initMainMenu();
@@ -38,7 +39,7 @@ private:
   int m_screenHeight = 768;
   float m_fps = 0.0f;
 
-  std::vector<BaseObject> m_menuObjects;
+  std::vector<BaseButton> m_menuButtons;
 
   Bengine::AudioEngine m_audioEngine;
   Bengine::Camera2D m_camera;
@@ -49,6 +50,7 @@ private:
   Bengine::SpriteBatch m_spriteBatch;
   Bengine::SpriteBatch m_hudSpriteBatch; //Fonts are sorted different
   Bengine::SpriteFont* m_spriteFont;
+  Bengine::SpriteFont* m_spriteFontMini;
   Bengine::Window m_window;
 
   GameState m_gameState = GameState::MAIN_MENU;

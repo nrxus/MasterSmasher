@@ -76,6 +76,9 @@ namespace Bengine {
         int m_regStart, m_regLength;
         CharGlyph* m_glyphs;
         int m_fontHeight;
+				float m_padding;
+				int m_trueFontHeight = 0;
+				int m_maxDescent = 0;
 
         unsigned int m_texID;
     };

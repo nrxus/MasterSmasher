@@ -8,8 +8,6 @@
 
 #include <glm/glm.hpp>
 
-enum class ShapeType { RECTANGLE, CIRCLE };
-
 class BaseObject {
 public:
 	BaseObject();
@@ -19,7 +17,7 @@ public:
 
 	void draw(Bengine::SpriteBatch& spriteBatch, float rotation = 0);
 	void initialize(Bengine::GLTexture texture, ShapeType shapeType,
-									glm::vec2 position, size_t totalFrames, Uint32 frameTicks,
+									glm::vec2 position, size_t totalFrames = 1, Uint32 frameTicks = 0,
 									bool loop = true, Bengine::ColorRGBA8 color = Bengine::WHITE_COLOR);
 	void move(const glm::vec2& center); // Move to
 	void scale(const glm::vec2& scale); // For circle, it will take min(scale.x, scale.y)

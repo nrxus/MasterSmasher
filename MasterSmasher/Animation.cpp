@@ -4,14 +4,14 @@ Animation::Animation() {}
 
 Animation::~Animation() {}
 
-void Animation::initialize(GLuint texture, size_t totalFrames, Uint32 frameTicks,
-													 glm::vec4 destRect, bool loop, Bengine::ColorRGBA8 color) {
+void Animation::initialize(GLuint texture, glm::vec4 destRect, size_t totalFrames,
+													 Uint32 frameTicks, bool loop, Bengine::ColorRGBA8 color) {
 	m_texture = texture;
 	m_totalFrames = totalFrames;
 	m_frameTicks = frameTicks;
+	m_destRect = destRect;
 	m_loop = loop;
 	m_color = color;
-	m_destRect = destRect;
 
 	m_active = true;
 	m_currentFrame = 0;
@@ -30,10 +30,14 @@ void Animation::draw(Bengine::SpriteBatch& spriteBatch, float rotation) {
 }
 
 void Animation::update() {
-	if (!m_active) return;
+	if (!m_active || m_totalFrames == 1) return; //Do not update inactive or single frame
 	Uint32 currentTicks = SDL_GetTicks();
 	m_elapsedTicks += currentTicks - m_previousTicks;
 	if (m_elapsedTicks > m_frameTicks) {
+		if (!m_loop) {
+			m_active = false;
+			return;
+		}
 		m_currentFrame = (m_currentFrame + 1) % (m_totalFrames);
 		if (m_currentFrame == 0 && !m_loop) m_active = false;
 		m_elapsedTicks -= m_frameTicks;

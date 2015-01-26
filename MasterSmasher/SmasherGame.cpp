@@ -8,10 +8,27 @@
 #include "Rectangle.h"
 #include "Circle.h"
 
-#include "BaseObject.h"
+#include "BaseButton.h"
 
 #include <string>
 #include <iostream>
+
+// Button click actions
+// TODO: Move to separate file
+
+bool SmasherGame::levelSelect(BaseButton& button) {
+  glm::vec2 mousePos = m_inputManager.getMouseCoords();
+  mousePos = m_camera.convertScreenToWorld(mousePos);
+  if (button.contains(mousePos)) {
+    button.setColor(Bengine::ColorRGBA8(255,255,0,255));
+    if (m_inputManager.isKeyReleased(SDL_BUTTON_LEFT)) {
+      std::cout << "HIZ" << std::endl;
+    }
+    return true;
+  }
+  button.setColor(Bengine::WHITE_COLOR);
+  return false;
+}
 
 SmasherGame::SmasherGame() {}
 
@@ -19,8 +36,8 @@ SmasherGame::~SmasherGame() {}
 
 void SmasherGame::run() {
   initSystems();
-  Bengine::Music music = m_audioEngine.loadMusic("Music/gameplaySong.ogg");
-  music.play(-1);
+  //Bengine::Music music = m_audioEngine.loadMusic("Music/gameplaySong.ogg");
+  //music.play(-1);
   initMainMenu();
   gameLoop();
 }
@@ -51,26 +68,32 @@ void SmasherGame::drawMenu() {
   //Draw background
   const glm::vec4 uvRect(0.0f,0.0f,1.0f,1.0f);
   glm::vec4 destRect(0.0f, 0.0f, m_screenWidth, m_screenHeight);
-  //Write text
+  //Draw text
   char buffer[256];
-  sprintf(buffer, "MASTER");
+  sprintf(buffer, "master");
+  //glm::vec2 txtSizeMaster = m_spriteFontMini->measure("master");
+  glm::vec2 txtSizeSmasher = m_spriteFont->measure("SMASHER");
+  //std::cout << m_spriteFont->getFontHeight() << std::endl;
+  float txtOffset = txtSizeSmasher.y;
   m_spriteBatch.begin(Bengine::GlyphSortType::NONE);
   m_hudSpriteBatch.begin();
-  m_spriteFont->draw(m_hudSpriteBatch, buffer,
-                     glm::vec2(m_screenWidth / 2.0f, 6.0f*m_screenHeight / 8.0f),
-                     glm::vec2(0.8f), 0.0f, Bengine::WHITE_COLOR,
-                     Bengine::Justification::MIDDLE);
+  glm::vec2 textPos = glm::vec2(m_screenWidth / 2.0f, 6.0f * m_screenHeight / 8.0f);
+  m_spriteFontMini->draw(m_hudSpriteBatch, buffer,
+                         textPos,
+                         glm::vec2(1.0f), 0.0f, Bengine::WHITE_COLOR,
+                         Bengine::Justification::MIDDLE);
   sprintf(buffer, "SMASHER");
   m_spriteFont->draw(m_hudSpriteBatch, buffer,
-                     glm::vec2(m_screenWidth / 2.0f, 6.0f*m_screenHeight / 8.0f),
-                     glm::vec2(0.8f), 0.0f, Bengine::ColorRGBA8(255,215,0,255),
+                     glm::vec2(textPos.x, textPos.y - txtOffset),
+                     glm::vec2(1.0f), 0.0f, Bengine::ColorRGBA8(248,184,0,255),
                      Bengine::Justification::MIDDLE);
+  //Draw background
   m_spriteBatch.draw(destRect,uvRect,
-                      Bengine::ResourceManager::getTexture("Menu/Background.png").id,
+                     Bengine::ResourceManager::getTexture("Menu/Background.png").id,
                      0.0f,Bengine::WHITE_COLOR);
   //Menu objects
-  for (size_t i = 0; i < m_menuObjects.size(); i++) {
-    m_menuObjects[i].draw(m_spriteBatch);
+  for (size_t i = 0; i < m_menuButtons.size(); i++) {
+    m_menuButtons[i].draw(m_spriteBatch);
   }
   m_spriteBatch.end();
   m_hudSpriteBatch.end();
@@ -79,12 +102,11 @@ void SmasherGame::drawMenu() {
 }
 
 void SmasherGame::initMainMenu() {
-  m_menuObjects.reserve(NUM_MENU_OBJECTS); //Avoid copying around when allocating @ push
-  m_menuObjects.emplace_back();
-  m_menuObjects[0].initialize(
-    Bengine::ResourceManager::getTexture("Menu/Title.png"),
-    ShapeType::RECTANGLE, glm::vec2(m_screenWidth / 2.0f, 6.0f*m_screenHeight / 8.0f),
-    1, 1);
+  m_menuButtons.reserve(NUM_MENU_OBJECTS); //Avoid copying around when allocating @ push
+  m_menuButtons.emplace_back();
+  m_menuButtons[0].initialize("Level Select", "Fonts/kenpixel_mini.ttf", 32,
+                              glm::vec2(m_screenWidth / 2.0f, 3.0f * m_screenHeight / 8.0),
+                              &SmasherGame::levelSelect);
 }
 
 void SmasherGame::initShaders() {
@@ -105,7 +127,8 @@ void SmasherGame::initSystems() {
 
   m_spriteBatch.init();
   m_hudSpriteBatch.init();
-  m_spriteFont = new Bengine::SpriteFont("Fonts/kenpixel_mini.ttf",64);
+  m_spriteFont = new Bengine::SpriteFont("Fonts/kenpixel.ttf",72);
+  m_spriteFontMini = new Bengine::SpriteFont("Fonts/kenpixel_mini.ttf",48);
   m_camera.init(m_screenWidth,m_screenHeight);
   m_camera.setPosition(glm::vec2(m_screenWidth / 2.0f,
                                  m_screenHeight / 2.0f)); //Center the camera
@@ -186,5 +209,8 @@ void SmasherGame::processInput() {
 }
 
 void SmasherGame::updateMenu(float deltaTime) {
-
+  //std::cout << mousePos.x << "," << mousePos.y << std::endl;
+  for (size_t i = 0; i < m_menuButtons.size(); i++) {
+    if (m_menuButtons[i].update(*this)) break;
+  }
 }

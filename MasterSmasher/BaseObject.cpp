@@ -32,9 +32,8 @@ void BaseObject::initialize(Bengine::GLTexture texture, ShapeType shapeType,
 	} else {
 		m_shape = new Circle(position, std::min(m_frameWidth, m_frameHeight) / 2.0f);
 	}
-	m_animation.initialize(texture.id, totalFrames, frameTicks,
-												 m_shape->getDestRect(), loop, color);
-	std::cout << m_shape->getDestRect().z << " " << m_shape->getDestRect().w << std::endl;
+	m_animation.initialize(texture.id, m_shape->getDestRect(),
+												 totalFrames, frameTicks, loop, color);
 }
 
 void BaseObject::move(const glm::vec2& center) {

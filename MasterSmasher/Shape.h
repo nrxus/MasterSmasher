@@ -5,6 +5,8 @@
 class Rectangle;
 class Circle;
 
+enum class ShapeType { RECTANGLE, CIRCLE };
+
 class Shape {
 public:
 	Shape() {}

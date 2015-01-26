@@ -11,6 +11,8 @@ namespace Bengine{
 
 		bool isKeyDown(unsigned int keyID);
 		bool isKeyPressed(unsigned int keyID);
+		bool isKeyReleased(unsigned int keyID);
+		bool wasKeyDown(unsigned int keyID);
     void pressKey(unsigned int keyID);
     void releaseKey(unsigned int keyID);
     void setMouseCoords(float x, float y);
@@ -19,8 +21,6 @@ namespace Bengine{
     glm::vec2 getMouseCoords() const { return m_mouseCoords; }
 
   private:
-		bool wasKeyDown(unsigned int keyID);
-
     std::unordered_map<unsigned int, bool> m_keyMap;
 		std::unordered_map<unsigned int, bool> m_previousKeyMap;
     glm::vec2 m_mouseCoords;
