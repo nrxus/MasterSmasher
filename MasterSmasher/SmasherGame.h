@@ -8,6 +8,8 @@
 #include <Bengine/SpriteFont.h>
 #include <Bengine/Window.h>
 
+#include "Level.h"
+
 #include <vector>
 
 class BaseButton;
@@ -23,22 +25,30 @@ public:
   void run();
 
 private:
-  bool levelSelect(BaseButton& button);
+  bool levelSelect(BaseButton& button, const glm::vec2& mousePos);
+  void clickLevelSelect(BaseButton& button);
+  void clickLevel(BaseButton& button);
   void drawGame();
+  void drawLevel();
   void drawMenu();
+  void drawLevelSelect();
   void initMainMenu();
   void initShaders();
   void initSystems();
   void gameLoop();
   void processInput();
-  void updateMenu(float deltaTime);
+  void updateButtons(std::vector<BaseButton>& buttons);
+  void updateLevel(float deltaTime);
 
-  const size_t NUM_MENU_OBJECTS = 5;
+  const size_t NUM_MENU_BUTTONS = 1;
+  const size_t NUM_MAX_LEVELS = 8;
 
   int m_screenWidth = 1024;
   int m_screenHeight = 768;
   float m_fps = 0.0f;
+  size_t m_maxLevel = 0;
 
+  std::vector<BaseButton> m_levelButtons;
   std::vector<BaseButton> m_menuButtons;
 
   Bengine::AudioEngine m_audioEngine;
@@ -52,6 +62,8 @@ private:
   Bengine::SpriteFont* m_spriteFont;
   Bengine::SpriteFont* m_spriteFontMini;
   Bengine::Window m_window;
+
+  Level m_level;
 
   GameState m_gameState = GameState::MAIN_MENU;
 };

@@ -16,7 +16,8 @@ void BaseButton::draw(Bengine::SpriteBatch& spriteBatch) {
 
 void BaseButton::initialize(const char* text, const char* font, int fontSize,
 														glm::vec2 position,
-														std::function<bool(SmasherGame&, BaseButton&)> updateFunc,
+														std::function<bool(BaseButton&, const glm::vec2&)> hoverFunc,
+														std::function<void(SmasherGame&, BaseButton&)> clickFunc,
 														const glm::vec2& scale,
 														Bengine::ColorRGBA8 color, ShapeType shapeType) {
 	sprintf(m_buffer, "%s", text);
@@ -24,7 +25,8 @@ void BaseButton::initialize(const char* text, const char* font, int fontSize,
 	m_position = position;
 	m_color = color;
 	m_scale = scale;
-	m_updateFunc = updateFunc;
+	m_hoverFunc = hoverFunc;
+	m_clickFunc = clickFunc;
 
 	glm::vec2 fontDims = m_spriteFont->measure(m_buffer);
 	fontDims.y -= fontSize/8.0f;
@@ -37,6 +39,10 @@ void BaseButton::initialize(const char* text, const char* font, int fontSize,
 	}
 }
 
-bool BaseButton::update(SmasherGame& game) {
-	return m_updateFunc(game,*this);
+bool BaseButton::hoverFunc(const glm::vec2& mousePos) {
+	return m_hoverFunc(*this, mousePos);
+}
+
+void BaseButton::clickFunc(SmasherGame& game) {
+	return m_clickFunc(game, *this);
 }

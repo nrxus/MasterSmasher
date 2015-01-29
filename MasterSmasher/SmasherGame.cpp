@@ -7,27 +7,37 @@
 
 #include "Rectangle.h"
 #include "Circle.h"
-
 #include "BaseButton.h"
 
 #include <string>
 #include <iostream>
+#include <stdio.h>
 
-// Button click actions
-// TODO: Move to separate file
-
-bool SmasherGame::levelSelect(BaseButton& button) {
-  glm::vec2 mousePos = m_inputManager.getMouseCoords();
-  mousePos = m_camera.convertScreenToWorld(mousePos);
+bool mouseHover(BaseButton& button, const glm::vec2 mousePos) {
   if (button.contains(mousePos)) {
     button.setColor(Bengine::ColorRGBA8(255,255,0,255));
-    if (m_inputManager.isKeyReleased(SDL_BUTTON_LEFT)) {
-      std::cout << "HIZ" << std::endl;
-    }
     return true;
   }
+  //Mouse over button
   button.setColor(Bengine::WHITE_COLOR);
   return false;
+}
+
+void SmasherGame::clickLevelSelect(BaseButton& button) {
+  std::string levelName;
+  for (size_t i = m_levelButtons.size() + 1; i <= m_maxLevel + 1; i++) {
+    levelName = "Level " + std::to_string(i);
+    m_levelButtons.emplace_back();
+    m_levelButtons[i-1].initialize(levelName.c_str(), "Fonts/kenpixel_mini.ttf", 32,
+                                   glm::vec2(m_screenWidth / 2.0f, m_screenHeight / 2.0f),
+                                   mouseHover, &SmasherGame::clickLevel);
+  }
+  m_gameState = GameState::LEVEL_SELECT;
+}
+
+void SmasherGame::clickLevel(BaseButton& button) {
+  m_level.initialize(button.getText());
+  m_gameState = GameState::PLAY;
 }
 
 SmasherGame::SmasherGame() {}
@@ -57,6 +67,19 @@ void SmasherGame::drawGame() {
   GLint pUniform = m_textureProgram.getUniformLocation("P");
   glUniformMatrix4fv(pUniform, 1, GL_FALSE, &projectionMatrix[0][0]);
 
+  switch(m_gameState) {
+  case GameState::MAIN_MENU:
+    drawMenu();
+    break;
+  case GameState::LEVEL_SELECT:
+    drawLevelSelect();
+    break;
+  case GameState::PLAY:
+    drawLevel();
+  default:
+    break;
+  }
+
   if (m_gameState == GameState::MAIN_MENU) drawMenu();
 
   m_textureProgram.unuse();
@@ -65,7 +88,6 @@ void SmasherGame::drawGame() {
 }
 
 void SmasherGame::drawMenu() {
-  //Draw background
   const glm::vec4 uvRect(0.0f,0.0f,1.0f,1.0f);
   glm::vec4 destRect(0.0f, 0.0f, m_screenWidth, m_screenHeight);
   //Draw text
@@ -101,12 +123,41 @@ void SmasherGame::drawMenu() {
   m_hudSpriteBatch.renderBatch();
 }
 
+void SmasherGame::drawLevelSelect() {
+  const glm::vec4 uvRect(0.0f,0.0f,1.0f,1.0f);
+  glm::vec4 destRect(0.0f, 0.0f, m_screenWidth, m_screenHeight);
+  m_spriteBatch.begin(Bengine::GlyphSortType::NONE);
+  //Draw background
+  m_spriteBatch.draw(destRect,uvRect,
+                     Bengine::ResourceManager::getTexture("Menu/Background.png").id,
+                     0.0f,Bengine::WHITE_COLOR);
+  //Menu objects
+  for (size_t i = 0; i < m_menuButtons.size(); i++) {
+    m_levelButtons[i].draw(m_spriteBatch);
+  }
+  m_spriteBatch.end();
+  m_spriteBatch.renderBatch();
+}
+
+void SmasherGame::drawLevel() {
+  const glm::vec4 uvRect(0.0f,0.0f,1.0f,1.0f);
+  glm::vec4 destRect(0.0f, 0.0f, m_screenWidth, m_screenHeight);
+  m_spriteBatch.begin(Bengine::GlyphSortType::NONE);
+  m_spriteBatch.draw(destRect,uvRect,
+                     Bengine::ResourceManager::getTexture("Backgrounds/bgGamePlay.png").id,
+                     0.0f,Bengine::WHITE_COLOR);
+  m_level.draw(m_spriteBatch);
+  m_spriteBatch.end();
+  m_spriteBatch.renderBatch();
+}
+
 void SmasherGame::initMainMenu() {
-  m_menuButtons.reserve(NUM_MENU_OBJECTS); //Avoid copying around when allocating @ push
-  m_menuButtons.emplace_back();
+  m_menuButtons.resize(NUM_MENU_BUTTONS);
+  m_levelButtons.reserve(NUM_MAX_LEVELS); //Reserve memory once, avoid re-allocating
+  //Select Level Button
   m_menuButtons[0].initialize("Level Select", "Fonts/kenpixel_mini.ttf", 32,
-                              glm::vec2(m_screenWidth / 2.0f, 3.0f * m_screenHeight / 8.0),
-                              &SmasherGame::levelSelect);
+                              glm::vec2(m_screenWidth / 2.0f, 3.0f * m_screenHeight/8.0),
+                              mouseHover, &SmasherGame::clickLevelSelect);
 }
 
 void SmasherGame::initShaders() {
@@ -156,17 +207,22 @@ void SmasherGame::gameLoop() {
     float frameTime = newTicks - previousTicks;
     previousTicks = newTicks;
     float totalDeltaTime = frameTime / DESIRED_FRAMETIME;
-    m_inputManager.update();
-    processInput();
     int i = 0;
     //Update
     while (totalDeltaTime > 0.0f && i < MAX_PHYSICS_STEPS) {
+      m_inputManager.update();
+      processInput();
       float deltaTime = std::min(totalDeltaTime,MAX_DELTA_TIME);
       //TODO: Update objects
       switch(m_gameState) {
       case GameState::MAIN_MENU:
-        updateMenu(deltaTime);
+        updateButtons(m_menuButtons);
         break;
+      case GameState::LEVEL_SELECT:
+        updateButtons(m_levelButtons);
+        break;
+      case GameState::PLAY:
+        updateLevel(deltaTime);
       default:
         break;
       }
@@ -208,9 +264,18 @@ void SmasherGame::processInput() {
   }
 }
 
-void SmasherGame::updateMenu(float deltaTime) {
-  //std::cout << mousePos.x << "," << mousePos.y << std::endl;
-  for (size_t i = 0; i < m_menuButtons.size(); i++) {
-    if (m_menuButtons[i].update(*this)) break;
+void SmasherGame::updateButtons(std::vector<BaseButton>& buttons) {
+  glm::vec2 mousePos = m_inputManager.getMouseCoords();
+  mousePos = m_camera.convertScreenToWorld(mousePos);
+  for (size_t i = 0; i < buttons.size(); i++) {
+    if (!buttons[i].hoverFunc(mousePos)) continue;
+    if (m_inputManager.isKeyReleased(SDL_BUTTON_LEFT)) {
+      buttons[i].clickFunc(*this);
+    }
+    break;
   }
+}
+
+void SmasherGame::updateLevel(float deltaTime) {
+  m_level.update();
 }
